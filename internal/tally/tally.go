@@ -28,15 +28,19 @@ func New() *Counter {
 
 // Bump adds delta to the total stored under key and returns the new total.
 // Keys are created on first use.
+//
+// The read-modify-write of e.n happens while holding mu; releasing the lock
+// between the map lookup and the add let concurrent Bumps on the same key
+// race on e.n and lose updates.
 func (c *Counter) Bump(key string, delta int) int {
 	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	e, ok := c.m[key]
 	if !ok {
 		e = &entry{}
 		c.m[key] = e
 	}
-	c.mu.Unlock()
-
 	e.n += delta
 	return e.n
 }
