@@ -60,12 +60,14 @@ func Apply(in []Criterion) (Report, error) {
 		}
 	}
 
-	sort.SliceStable(in, func(i, j int) bool {
-		return in[i].Weight > in[j].Weight
+	ordered := make([]Criterion, len(in))
+	copy(ordered, in)
+	sort.SliceStable(ordered, func(i, j int) bool {
+		return ordered[i].Weight > ordered[j].Weight
 	})
 
-	rep := Report{Lines: make([]Line, 0, len(in))}
-	for _, c := range in {
+	rep := Report{Lines: make([]Line, 0, len(ordered))}
+	for _, c := range ordered {
 		points := c.Weight * c.Score
 		rep.Lines = append(rep.Lines, Line{
 			Name:   c.Name,
