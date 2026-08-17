@@ -30,12 +30,13 @@ func New() *Counter {
 // Keys are created on first use.
 func (c *Counter) Bump(key string, delta int) int {
 	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	e, ok := c.m[key]
 	if !ok {
 		e = &entry{}
 		c.m[key] = e
 	}
-	c.mu.Unlock()
 
 	e.n += delta
 	return e.n
